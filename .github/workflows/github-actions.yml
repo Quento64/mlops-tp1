@@ -21,3 +21,14 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/predict_app:latest
+
+      - name: Deploy on VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          password: ${{ secrets.VM_PASSWORD }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/predict_app:latest
+            docker stop predict_app || true
+            docker rm predict_app || true
+            docker run -d --name predict_app -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/predict_app:latest
