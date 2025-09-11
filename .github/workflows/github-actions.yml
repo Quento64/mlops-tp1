@@ -26,6 +26,7 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
+          user: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
           script: |
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/predict_app:latest
