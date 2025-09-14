@@ -6,3 +6,5 @@ pydantic
 requests
 pandas
 scikit-learn
+transformers
+torch
