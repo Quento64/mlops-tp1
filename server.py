@@ -1,17 +1,24 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import joblib
+from transformers import pipeline
 
+mlm = pipeline("fill-mask", model="bert-base-uncased")
 
 app = FastAPI()
-model = joblib.load("regression.joblib")
 
-class PredictInput(BaseModel):
-    size: float
-    nb_rooms: int
-    garden: int
+class TextInput(BaseModel):
+    text: str
+
+@app.get("/")
+def root():
+    return {"message": "BERT Masked LM API is running!"}
 
 @app.post("/predict")
-async def predict(data: PredictInput):
-    predicted_price = model.predict([[data.size, data.nb_rooms, data.garden]])
-    return {"price_pred": predicted_price[0]}
+def predict(data: TextInput):
+    """
+    Expects input like: "The quick brown [MASK] jumps over the lazy dog."
+    Returns top predictions for the masked token.
+    """
+    predictions = mlm(data.text)
+    output = [{"token": p["token_str"], "score": p["score"]} for p in predictions]
+    return {"input": data.text, "predictions": output}

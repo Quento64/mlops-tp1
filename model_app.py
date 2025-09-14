@@ -1,14 +1,14 @@
 import streamlit as st
-import joblib
+from transformers import pipeline
 
 @st.cache_data
 def load_data():
-    return joblib.load("regression.joblib")
+    return pipeline("fill-mask", model="bert-base-uncased")
 
 model = load_data()
-size = st.number_input("size")
-nb_rooms = st.number_input("nb_rooms", 0, value=0)
-garden = st.number_input("garden", 0, 1, 0)
+text = st.text_input("input_text", "salut [MASK] ça va ?")
 
-prediction = model.predict([[size, nb_rooms, garden]])
-st.write("Predicted price:", prediction[0])
+predictions = model(text)
+output = [{"token": p["token_str"], "score": p["score"]} for p in predictions]
+
+st.write("Predicted token:", output)
